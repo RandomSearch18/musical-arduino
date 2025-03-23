@@ -48,7 +48,8 @@ int midiChannel = 1;  // Define which MIDI channel to transmit on (1 to 16).
 //
 #define PULLUPINPUTS 1
 
-#define SPEAKER  12
+
+#define SPEAKER A5
 // Set up the input and output pins to be used for the keys.
 // NB: On the Arduino Nano, pin 13 is attached to the onboard LED
 //     and pins 0 and 1 are used for the serial port.
