@@ -41,8 +41,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 int midiChannel = 1;
 
 // Set up the input and output pins to be used for the keys
-#define NUM_OCTAVES 5
-#define NOTES_PER_OCTAVE 7
+#define NUM_OCTAVES 5;
+#define NOTES_PER_OCTAVE 7;
 
 // One I/O expander for each octave
 // We find each expander using its I2C address, and put them in this array
@@ -52,7 +52,7 @@ PCF8574 expanders[NUM_OCTAVES] = {
   PCF8574(0x21),
   PCF8574(0x22),
   PCF8574(0x23)
-}
+};
 
 // The pins on the I/O expander that correspond to each note index
 int octave_pins[NOTES_PER_OCTAVE] = {
