@@ -88,17 +88,17 @@ void setup() {
   //Serial.begin (115200);
 
   // Initialise the input buttons as piano "keys"
-  for (int i = 0; i < NUM_OCTAVES; i++) {
-    for (int j = 0; j < NOTES_PER_OCTAVE; j++) {
+  for (int octave = 0; octave < NUM_OCTAVES; octave++) {
+    for (int key = 0; key < NOTES_PER_OCTAVE; key++) {
       // Set up the pin for the key
-      PCF8574* expander = expanders[i];
+      PCF8574* expander = expanders[octave];
       if (expander) {
         // The pin is on an I/O expander
-        int pin = octave_pins[j];
+        int pin = octave_pins[key];
         expander->pinMode(pin, INPUT_PULLUP);
       } else {
         // The pin is directly on the Arduino (first octave)
-        int pin = octave_pins_arduino[j];
+        int pin = octave_pins_arduino[key];
         pinMode(pin, INPUT_PULLUP);
       }
     }
@@ -125,30 +125,30 @@ uint8_t get_key_state(int octave, int key) {
 void loop() {
   // Check each button and if pressed play the note.
   // Loop through each octave
-  for (int i = 0; i < NUM_OCTAVES; i++) {
+  for (int octave = 0; octave < NUM_OCTAVES; octave++) {
     // Check each button/key/note in this octave
-    for (int j = 0; j < NOTES_PER_OCTAVE; j++) {
+    for (int key = 0; key < NOTES_PER_OCTAVE; key++) {
       // Read the state of the button
-      int pin = octave_pins[j];
-      uint8_t state = get_key_state(i, j);
+      int pin = octave_pins[key];
+      uint8_t state = get_key_state(octave, key);
       if (state == LOW) {
         // Button IS pressed
-        if (octave_playing != i || key_playing != j) {
+        if (octave_playing != octave || key_playing != key) {
           // Unpressed-to-pressed transition
           if (octave_playing != -1) {
             // Stop the previous note
             MIDI.sendNoteOff(notes[octave_playing][key_playing], 0, midiChannel);
           }
           // Start the new note
-          MIDI.sendNoteOn(notes[i][j], 127, midiChannel);
-          octave_playing = i;
-          key_playing = j;
+          MIDI.sendNoteOn(notes[octave][key], 127, midiChannel);
+          octave_playing = octave;
+          key_playing = key;
         }
       } else {
         // Button is NOT pressed
-        if (octave_playing == i && key_playing == j) {
+        if (octave_playing == octave && key_playing == key) {
           // Pressed-to-unpressed transition
-          MIDI.sendNoteOff(notes[i][j], 0, midiChannel);
+          MIDI.sendNoteOff(notes[octave][key], 0, midiChannel);
           octave_playing = -1;
           key_playing = -1;
         }
