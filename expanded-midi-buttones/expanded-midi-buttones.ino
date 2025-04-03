@@ -106,7 +106,7 @@ void setup() {
 }
 
 /**
- * Reads the specified key (i.e. button) in the specified octave
+ * Reads the specified key (i.e. button) in the specified octave.
  * Returns the button state, i.e. `LOW` (pressed) or `HIGH` (not pressed)
  */
 uint8_t get_key_state(int octave, int key) {
