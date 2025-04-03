@@ -41,14 +41,17 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 int midiChannel = 1;
 
 // Set up the input and output pins to be used for the keys
-#define NUM_OCTAVES 2
+#define NUM_OCTAVES 5
 #define NOTES_PER_OCTAVE 7
 
 // One I/O expander for each octave
 // We find each expander using its I2C address, and put them in this array
 PCF8574 expanders[NUM_OCTAVES] = {
+  -1, // The first octave is directly conencted, so doesn't have an expander
   PCF8574(0x20),
-  PCF8574(0x21)
+  PCF8574(0x21),
+  PCF8574(0x22),
+  PCF8574(0x23)
 }
 
 // The pins on the I/O expander that correspond to each note index
@@ -58,8 +61,11 @@ int octave_pins[NOTES_PER_OCTAVE] = {
 
 // Set the MIDI codes for the notes to be played by each key
 int notes[NUM_OCTAVES][NOTES_PER_OCTAVE] = {
-  {60, 62, 64, 65, 67, 69, 71}, // C4 to B4
-  {72, 74, 76, 77, 79, 81, 83}  // C5 to B5
+  {29, 31, 33, 35, 36, 38, 40}, // F1 to E2 (first octave) (directly connected to Arduino)
+  {41, 43, 45, 47, 48, 50, 52}, // F2 to E2
+  {53, 55, 57, 59, 60, 62, 64}, // F3 to E3
+  {65, 67, 69, 71, 72, 74, 76}, // F4 to E4
+  {77, 79, 81, 83, 84, 86, 88}, // F5 to E5
 };
 
 // The current octave playing
