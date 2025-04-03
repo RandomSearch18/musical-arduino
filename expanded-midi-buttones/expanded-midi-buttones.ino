@@ -46,17 +46,21 @@ int midiChannel = 1;
 
 // One I/O expander for each octave
 // We find each expander using its I2C address, and put them in this array
-PCF8574 expanders[NUM_OCTAVES] = {
-  -1, // The first octave is directly conencted, so doesn't have an expander
-  PCF8574(0x20),
-  PCF8574(0x21),
-  PCF8574(0x22),
-  PCF8574(0x23)
+PCF8574* expanders[NUM_OCTAVES] = {
+  nullptr, // The first octave is directly conencted, so doesn't have an expander
+  new PCF8574(0x20),
+  new PCF8574(0x21),
+  new PCF8574(0x22),
+  new PCF8574(0x23)
 };
 
-// The pins on the I/O expander that correspond to each note index
+// The pins on the I/O expanders that correspond to each note index
 int octave_pins[NOTES_PER_OCTAVE] = {
   P0, P1, P2, P3, P4, P5, P6
+};
+// The pins on the Arduino that correspond to each note index (for the first octave)
+int octave_pins_arduino[NOTES_PER_OCTAVE] = {
+  2, 3, 4, 5, 6, 7, 8
 };
 
 // Set the MIDI codes for the notes to be played by each key
@@ -87,9 +91,34 @@ void setup() {
   for (int i = 0; i < NUM_OCTAVES; i++) {
     for (int j = 0; j < NOTES_PER_OCTAVE; j++) {
       // Set up the pin for the key
-      int pin = octave_pins[j];
-      expanders[i].pinMode(pin, INPUT_PULLUP);
+      PCF8574* expander = expanders[i];
+      if (expander) {
+        // The pin is on an I/O expander
+        int pin = octave_pins[j];
+        expander->pinMode(pin, INPUT_PULLUP);
+      } else {
+        // The pin is directly on the Arduino (first octave)
+        int pin = octave_pins_arduino[j];
+        pinMode(pin, INPUT_PULLUP);
+      }
     }
+  }
+}
+
+/**
+ * Reads the specified key (i.e. button) in the specified octave
+ * Returns the button state, i.e. `LOW` (pressed) or `HIGH` (not pressed)
+ */
+uint8_t get_key_state(int octave, int key) {
+  PCF8574* expander = expanders[octave];
+  if (expander) {
+    // If it's on an expander, read the pin from the expander
+    int pin = octave_pins[key];
+    return expander->digitalRead(pin);
+  } else {
+    // If it's directly on the Arduino, just read that Arduino pin
+    int pin = octave_pins_arduino[key];
+    return digitalRead(pin);
   }
 }
 
@@ -101,8 +130,8 @@ void loop() {
     for (int j = 0; j < NOTES_PER_OCTAVE; j++) {
       // Read the state of the button
       int pin = octave_pins[j];
-      uint8_t value = expanders[i].digitalRead(pin);
-      if (value == LOW) {
+      uint8_t state = get_key_state(i, j);
+      if (state == LOW) {
         // Button IS pressed
         if (octave_playing != i || key_playing != j) {
           // Unpressed-to-pressed transition
